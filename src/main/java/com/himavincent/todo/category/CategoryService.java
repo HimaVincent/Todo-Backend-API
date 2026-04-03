@@ -2,6 +2,7 @@ package com.himavincent.todo.category;
 
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.himavincent.todo.category.dtos.CategoryResponseDto;
@@ -21,25 +22,26 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final TaskRepository taskRepository;
+    private final ModelMapper modelMapper;
 
-    public CategoryService(CategoryRepository categoryRepository, TaskRepository taskRepository) {
+    public CategoryService(CategoryRepository categoryRepository, TaskRepository taskRepository,
+            ModelMapper modelMapper) {
         this.categoryRepository = categoryRepository;
         this.taskRepository = taskRepository;
+        this.modelMapper = modelMapper;
     }
 
     public List<CategoryResponseDto> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
 
         return categories.stream()
-                .map(category -> new CategoryResponseDto(
-                        category.getId(),
-                        category.getName()))
+                .map(category -> modelMapper.map(category, CategoryResponseDto.class))
                 .toList();
     }
 
     public CategoryResponseDto createCategory(CreateCategoryDto data) {
 
-        String name = data.getName().trim();
+        String name = data.getName();
 
         if (categoryRepository.existsByNameIgnoreCase(name)) {
             throw new BadRequestException("Category already exists");
@@ -50,9 +52,7 @@ public class CategoryService {
 
         Category savedCategory = categoryRepository.save(category);
 
-        return new CategoryResponseDto(
-                savedCategory.getId(),
-                savedCategory.getName());
+        return modelMapper.map(savedCategory, CategoryResponseDto.class);
     }
 
     public CategoryResponseDto updateCategory(Long id, UpdateCategoryDto data) {
@@ -60,7 +60,7 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
 
-        String name = data.getName().trim();
+        String name = data.getName();
 
         if (categoryRepository.existsByNameIgnoreCase(name)
                 && !category.getName().equalsIgnoreCase(name)) {
@@ -71,9 +71,7 @@ public class CategoryService {
 
         Category updatedCategory = categoryRepository.save(category);
 
-        return new CategoryResponseDto(
-                updatedCategory.getId(),
-                updatedCategory.getName());
+        return modelMapper.map(updatedCategory, CategoryResponseDto.class);
     }
 
     @Transactional

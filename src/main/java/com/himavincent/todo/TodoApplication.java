@@ -8,6 +8,9 @@ public class TodoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(TodoApplication.class, args);
+
+		System.out.println(java.time.ZoneId.systemDefault());
+		System.out.println(java.time.ZonedDateTime.now());
 	}
 
 }

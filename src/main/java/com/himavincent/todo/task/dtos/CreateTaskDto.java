@@ -26,7 +26,7 @@ public class CreateTaskDto {
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.title = title == null ? null : title.trim();
     }
 
     public String getNotes() {
@@ -34,7 +34,12 @@ public class CreateTaskDto {
     }
 
     public void setNotes(String notes) {
-        this.notes = notes;
+        if (notes == null) {
+            this.notes = null;
+        } else {
+            String trimmed = notes.trim();
+            this.notes = trimmed.isEmpty() ? null : trimmed;
+        }
     }
 
     public LocalDateTime getDueAt() {

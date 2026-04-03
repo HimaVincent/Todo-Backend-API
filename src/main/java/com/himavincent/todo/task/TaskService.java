@@ -3,6 +3,7 @@ package com.himavincent.todo.task;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.modelmapper.ModelMapper;
 
 import com.himavincent.todo.category.entities.Category;
 import com.himavincent.todo.category.CategoryRepository;
@@ -19,24 +20,26 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final CategoryRepository categoryRepository;
+    private final ModelMapper modelMapper;
 
-    public TaskService(TaskRepository taskRepository, CategoryRepository categoryRepository) {
+    public TaskService(TaskRepository taskRepository, CategoryRepository categoryRepository, ModelMapper modelMapper) {
         this.taskRepository = taskRepository;
         this.categoryRepository = categoryRepository;
+        this.modelMapper = modelMapper;
     }
 
     public List<TaskResponseDto> getAllTasks() {
         return taskRepository.findByArchivedFalse()
                 .stream()
-                .map(this::toResponseDto)
+                .map(this::mapToResponseDto)
                 .toList();
     }
 
     public TaskResponseDto createTask(CreateTaskDto dto) {
         Task task = new Task();
 
-        task.setTitle(trimAndValidateTitle(dto.getTitle()));
-        task.setNotes(trimNotes(dto.getNotes()));
+        task.setTitle(validateTitle(dto.getTitle()));
+        task.setNotes(dto.getNotes());
         task.setDueAt(dto.getDueAt());
         task.setCompleted(false);
         task.setArchived(false);
@@ -49,7 +52,7 @@ public class TaskService {
         }
 
         Task savedTask = taskRepository.save(task);
-        return toResponseDto(savedTask);
+        return mapToResponseDto(savedTask);
     }
 
     public TaskResponseDto updateTask(Long id, UpdateTaskDto dto) {
@@ -61,11 +64,11 @@ public class TaskService {
         Long categoryId = dto.getCategoryId();
 
         if (title != null) {
-            task.setTitle(trimAndValidateTitle(title));
+            task.setTitle(validateTitle(title));
         }
 
         if (notes != null) {
-            task.setNotes(trimNotes(notes));
+            task.setNotes(notes);
         }
 
         if (dto.getDueAt() != null) {
@@ -79,7 +82,7 @@ public class TaskService {
 
         Task updatedTask = taskRepository.save(task);
 
-        return toResponseDto(updatedTask);
+        return mapToResponseDto(updatedTask);
     }
 
     public TaskResponseDto updateTaskCompletion(Long id, UpdateTaskCompletionDto dto) {
@@ -88,7 +91,7 @@ public class TaskService {
         task.setCompleted(dto.getCompleted());
 
         Task updatedTask = taskRepository.save(task);
-        return toResponseDto(updatedTask);
+        return mapToResponseDto(updatedTask);
     }
 
     public void deleteTask(Long id) {
@@ -108,41 +111,24 @@ public class TaskService {
                 .orElseThrow(() -> new NotFoundException("Category not found"));
     }
 
-    private String trimAndValidateTitle(String title) {
-        String trimmedTitle = title == null ? null : title.trim();
-
-        if (trimmedTitle == null || trimmedTitle.isBlank()) {
+    private String validateTitle(String title) {
+        if (title == null || title.isBlank()) {
             throw new BadRequestException("Title is required");
         }
-
-        return trimmedTitle;
+        return title;
     }
 
-    private String trimNotes(String notes) {
-        if (notes == null) {
-            return null;
-        }
-
-        String trimmedNotes = notes.trim();
-        return trimmedNotes.isEmpty() ? null : trimmedNotes;
-    }
-
-    private TaskResponseDto toResponseDto(Task task) {
-        Long categoryId = null;
-        String categoryName = null;
+    private TaskResponseDto mapToResponseDto(Task task) {
+        TaskResponseDto dto = modelMapper.map(task, TaskResponseDto.class);
 
         if (task.getCategory() != null) {
-            categoryId = task.getCategory().getId();
-            categoryName = task.getCategory().getName();
+            dto.setCategoryId(task.getCategory().getId());
+            dto.setCategoryName(task.getCategory().getName());
+        } else {
+            dto.setCategoryId(null);
+            dto.setCategoryName(null);
         }
 
-        return new TaskResponseDto(
-                task.getId(),
-                task.getTitle(),
-                task.getNotes(),
-                task.getDueAt(),
-                task.isCompleted(),
-                categoryId,
-                categoryName);
+        return dto;
     }
 }
