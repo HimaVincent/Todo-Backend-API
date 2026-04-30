@@ -9,7 +9,7 @@ import com.himavincent.todo.task.entities.Task;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    List<Task> findByArchivedFalse();
+    List<Task> findByArchivedFalseOrderByCreatedAtDesc();
 
     Optional<Task> findByIdAndArchivedFalse(Long id);
 
