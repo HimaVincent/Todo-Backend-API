@@ -1,6 +1,7 @@
 package com.himavincent.todo.task;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
@@ -88,7 +89,15 @@ public class TaskService {
     public TaskResponseDto updateTaskCompletion(Long id, UpdateTaskCompletionDto dto) {
         Task task = findActiveTaskById(id);
 
-        task.setCompleted(dto.getCompleted());
+        boolean completed = dto.getCompleted();
+
+        task.setCompleted(completed);
+
+        if (completed) {
+            task.setCompletedAt(LocalDateTime.now());
+        } else {
+            task.setCompletedAt(null);
+        }
 
         Task updatedTask = taskRepository.save(task);
         return mapToResponseDto(updatedTask);

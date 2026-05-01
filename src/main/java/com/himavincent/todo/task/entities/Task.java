@@ -27,6 +27,9 @@ public class Task extends BaseEntity {
     @Column(nullable = false)
     private boolean completed = false;
 
+    @Column
+    private LocalDateTime completedAt;
+
     @Column(nullable = false)
     private boolean archived = false;
 
@@ -78,6 +81,14 @@ public class Task extends BaseEntity {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
     }
 
     public boolean isArchived() {

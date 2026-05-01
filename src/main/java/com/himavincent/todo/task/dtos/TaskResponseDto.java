@@ -9,6 +9,7 @@ public class TaskResponseDto {
     private String notes;
     private LocalDateTime dueAt;
     private boolean completed;
+    private LocalDateTime completedAt;
     private Long categoryId;
     private String categoryName;
 
@@ -64,6 +65,14 @@ public class TaskResponseDto {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
     }
 
     public Long getCategoryId() {
