@@ -72,15 +72,14 @@ public class TaskService {
             task.setNotes(notes);
         }
 
-        if (dto.getDueAt() != null) {
-            task.setDueAt(dto.getDueAt());
-        }
+        task.setDueAt(dto.getDueAt());
 
-        if (categoryId != null) {
+        if (categoryId == null) {
+            task.setCategory(null);
+        } else {
             Category category = findCategoryById(categoryId);
             task.setCategory(category);
         }
-
         Task updatedTask = taskRepository.save(task);
 
         return mapToResponseDto(updatedTask);
