@@ -30,7 +30,7 @@ public class TaskService {
     }
 
     public List<TaskResponseDto> getAllTasks() {
-        return taskRepository.findByArchivedFalseOrderByCreatedAtDesc()
+        return taskRepository.findByArchivedFalseOrderByUpdatedAtDesc()
                 .stream()
                 .map(this::mapToResponseDto)
                 .toList();
